@@ -1,0 +1,50 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+.excellent .dot {
+  background: var(--green);
+  box-shadow: 0 0 4px var(--green);
+}
+
+.good .dot {
+  background: var(--green);
+}
+
+.poor .dot {
+  background: var(--red);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.unknown .dot {
+  background: var(--fg-disabled);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
