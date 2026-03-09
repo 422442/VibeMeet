@@ -2,15 +2,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  font-family: var(--font-family);
-  font-size: var(--text-base);
+  gap: var(--sp-2);
   font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
   white-space: nowrap;
-  user-select: none;
+  cursor: pointer;
 }
 
 .button:active {
@@ -23,12 +20,11 @@
   transform: none;
 }
 
-/* Variants */
 .primary {
   background: var(--accent);
-  color: #fff;
-  border-radius: var(--radius-md);
+  color: white;
 }
+
 .primary:hover:not(:disabled) {
   background: var(--accent-hover);
 }
@@ -36,46 +32,45 @@
 .secondary {
   background: var(--bg-elevated);
   color: var(--fg-primary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--tile-border);
-}
-.secondary:hover:not(:disabled) {
-  background: var(--bg-surface);
-  border-color: var(--fg-disabled);
 }
 
-.danger {
-  background: var(--red);
-  color: #fff;
-  border-radius: var(--radius-md);
-}
-.danger:hover:not(:disabled) {
-  background: #c94444;
+.secondary:hover:not(:disabled) {
+  background: var(--bg-hover);
 }
 
 .ghost {
   background: transparent;
   color: var(--fg-secondary);
-  border-radius: var(--radius-md);
 }
+
 .ghost:hover:not(:disabled) {
   background: var(--bg-elevated);
   color: var(--fg-primary);
 }
 
-/* Sizes */
+.danger {
+  background: var(--red);
+  color: white;
+}
+
+.danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
 .sm {
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--text-sm);
   height: 32px;
+  padding: 0 var(--sp-3);
+  font-size: var(--text-sm);
 }
+
 .md {
-  padding: var(--space-2) var(--space-6);
+  height: 40px;
+  padding: 0 var(--sp-4);
   font-size: var(--text-base);
-  height: 42px;
 }
+
 .lg {
-  padding: var(--space-3) var(--space-8);
-  font-size: var(--text-lg);
-  height: 52px;
+  height: 48px;
+  padding: 0 var(--sp-6);
+  font-size: var(--text-base);
 }

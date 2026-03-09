@@ -1,57 +1,107 @@
-.grid {
-  display: grid;
-  gap: var(--space-3);
-  padding: var(--space-4);
+﻿.grid {
   flex: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), 1fr);
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  overflow-y: auto;
   align-content: center;
 }
 
+.cell {
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+}
+
+/* Speaker layout */
 .speakerLayout {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  flex: 1;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  overflow: hidden;
 }
 
-.speakerLayout > *:first-child {
+.speakerLayout .mainStage {
   flex: 1;
   min-height: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
-.speakerLayout > .thumbnailStrip {
+.strip {
   display: flex;
-  gap: var(--space-2);
-  height: 120px;
-  justify-content: center;
+  gap: var(--sp-2);
+  overflow-x: auto;
+  flex-shrink: 0;
+  padding-bottom: var(--sp-1);
 }
 
+.stripTile {
+  width: 180px;
+  aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+}
+
+/* Sidebar layout */
 .sidebarLayout {
-  display: flex;
-  gap: var(--space-3);
-  padding: var(--space-4);
   flex: 1;
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  overflow: hidden;
 }
 
-.sidebarLayout > *:first-child {
+.sidebarLayout .mainStage {
   flex: 1;
   min-height: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
-.sidebarLayout > *:last-child {
-  width: 200px;
+.sidebar {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--sp-2);
+  width: 200px;
+  flex-shrink: 0;
+  overflow-y: auto;
 }
 
-@media (max-width: 768px) {
+.sidebarTile {
+  aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(min(var(--cols, 2), 2), 1fr);
+    gap: var(--sp-1);
+    padding: var(--sp-1);
+  }
+
+  .stripTile {
+    width: 140px;
+  }
+
+  .sidebar {
+    width: 120px;
+  }
+
   .sidebarLayout {
     flex-direction: column;
   }
-  .sidebarLayout > *:last-child {
+
+  .sidebar {
     width: 100%;
     flex-direction: row;
-    height: 100px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .sidebarTile {
+    width: 140px;
+    flex-shrink: 0;
   }
 }

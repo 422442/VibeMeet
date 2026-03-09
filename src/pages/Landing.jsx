@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../components/UI/Button';
 import { generateRoomCode, validateRoomCode, cleanRoomCode, formatRoomCode } from '../utils/roomCode';
 import styles from './Landing.module.css';
 
@@ -35,21 +34,19 @@ function Landing() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.page}>
       <div className={styles.content}>
-        <div className={styles.logo}>VibeMeet</div>
-        <p className={styles.tagline}>Meet without the noise.</p>
+        <h1 className={styles.brand}>VibeMeet</h1>
+        <p className={styles.tagline}>Video calls, simplified. No accounts, no downloads.</p>
 
         <div className={styles.actions}>
-          <Button variant="primary" size="lg" onClick={handleStart} className={styles.startBtn}>
+          <button className={styles.startBtn} onClick={handleStart}>
             Start a meeting
-          </Button>
+          </button>
 
-          <div className={styles.divider}>
-            <span className={styles.dividerText}>or join an existing one</span>
-          </div>
+          <div className={styles.divider}>or join with a code</div>
 
-          <div className={styles.joinRow}>
+          <div className={styles.joinGroup}>
             <input
               type="text"
               value={formatRoomCode(joinCode)}
@@ -61,17 +58,17 @@ function Landing() {
               autoComplete="off"
               spellCheck="false"
             />
-            <Button variant="secondary" size="lg" onClick={handleJoin} disabled={joinCode.length < 6}>
+            <button
+              className={styles.joinBtn}
+              onClick={handleJoin}
+              disabled={joinCode.length < 6}
+            >
               Join
-            </Button>
+            </button>
           </div>
 
           {error && <p className={styles.error}>{error}</p>}
         </div>
-
-        <p className={styles.footer}>
-          No account. No download. Just the meeting.
-        </p>
       </div>
     </div>
   );

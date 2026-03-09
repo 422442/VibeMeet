@@ -1,66 +1,122 @@
-import React, { useState, useCallback, Suspense } from 'react';
+import React, { useState, useCallback, useEffect, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { LiveKitRoom, VideoConference, useRoomContext, useTracks, useLocalParticipant } from '@livekit/components-react';
-import { Track, RoomEvent, ConnectionQuality } from 'livekit-client';
+import {
+  LiveKitRoom,
+  useRoomContext,
+  useTracks,
+  useLocalParticipant,
+  useParticipants,
+} from '@livekit/components-react';
+import { Track, RoomEvent, ConnectionQuality, VideoPresets } from 'livekit-client';
 import { useRoom } from '../hooks/useRoom';
 import CodeDisplay from '../components/UI/CodeDisplay';
 import Spinner from '../components/UI/Spinner';
 import VideoGrid from '../components/Conference/VideoGrid';
 import VideoTile from '../components/Conference/VideoTile';
+import AudioRenderer from '../components/Conference/AudioRenderer';
 import ControlBar from '../components/Conference/ControlBar';
 import styles from './Room.module.css';
 
 const SetupPanel = React.lazy(() => import('../components/SetupPanel/SetupPanel'));
 
+const ROOM_OPTIONS = {
+  adaptiveStream: true,
+  dynacast: true,
+  audioCaptureDefaults: {
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  },
+  videoCaptureDefaults: {
+    resolution: VideoPresets.h720.resolution,
+  },
+  publishDefaults: {
+    simulcast: true,
+    videoSimulcastLayers: [
+      VideoPresets.h540,
+      VideoPresets.h216,
+    ],
+    videoCodec: 'vp8',
+  },
+  disconnectOnPageLeave: true,
+  reconnectPolicy: {
+    maxRetries: 5,
+    nextRetryDelayInMs: (retryCount) => Math.min(1000 * Math.pow(2, retryCount), 10000),
+  },
+};
+
 function RoomInner({ roomCode, onLeave }) {
   const room = useRoomContext();
   const { localParticipant } = useLocalParticipant();
+  const participants = useParticipants();
   const [viewMode, setViewMode] = useState('grid');
-  const [micEnabled, setMicEnabled] = useState(true);
-  const [camEnabled, setCamEnabled] = useState(true);
-  const [screenShareEnabled, setScreenShareEnabled] = useState(false);
   const [qualities, setQualities] = useState({});
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
-  const tracks = useTracks(
+  const micTrack = localParticipant?.getTrackPublication(Track.Source.Microphone);
+  const camTrack = localParticipant?.getTrackPublication(Track.Source.Camera);
+  const screenTrack = localParticipant?.getTrackPublication(Track.Source.ScreenShare);
+
+  const micEnabled = !!micTrack && !micTrack.isMuted;
+  const camEnabled = !!camTrack && !camTrack.isMuted;
+  const screenShareEnabled = !!screenTrack;
+
+  const videoTracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
       { source: Track.Source.ScreenShare, withPlaceholder: false },
-      { source: Track.Source.Microphone, withPlaceholder: false },
     ],
     { onlySubscribed: false }
   );
 
-  React.useEffect(() => {
+  const audioTracks = useTracks(
+    [{ source: Track.Source.Microphone, withPlaceholder: false }],
+    { onlySubscribed: true }
+  );
+
+  useEffect(() => {
     if (!room) return;
 
     const handleQuality = (quality, participant) => {
       setQualities((prev) => ({ ...prev, [participant.identity]: quality }));
     };
 
+    const handleReconnecting = () => setIsReconnecting(true);
+    const handleReconnected = () => setIsReconnecting(false);
+    const handleDisconnected = () => onLeave();
+
     room.on(RoomEvent.ConnectionQualityChanged, handleQuality);
+    room.on(RoomEvent.Reconnecting, handleReconnecting);
+    room.on(RoomEvent.Reconnected, handleReconnected);
+    room.on(RoomEvent.Disconnected, handleDisconnected);
+
     return () => {
       room.off(RoomEvent.ConnectionQualityChanged, handleQuality);
+      room.off(RoomEvent.Reconnecting, handleReconnecting);
+      room.off(RoomEvent.Reconnected, handleReconnected);
+      room.off(RoomEvent.Disconnected, handleDisconnected);
     };
-  }, [room]);
+  }, [room, onLeave]);
 
   const handleToggleMic = useCallback(async () => {
     if (!localParticipant) return;
     await localParticipant.setMicrophoneEnabled(!micEnabled);
-    setMicEnabled((prev) => !prev);
   }, [localParticipant, micEnabled]);
 
   const handleToggleCam = useCallback(async () => {
     if (!localParticipant) return;
     await localParticipant.setCameraEnabled(!camEnabled);
-    setCamEnabled((prev) => !prev);
   }, [localParticipant, camEnabled]);
 
   const handleToggleScreenShare = useCallback(async () => {
     if (!localParticipant) return;
-    await localParticipant.setScreenShareEnabled(!screenShareEnabled);
-    setScreenShareEnabled((prev) => !prev);
-    if (!screenShareEnabled) {
-      setViewMode('speaker');
+    try {
+      await localParticipant.setScreenShareEnabled(!screenShareEnabled);
+      if (!screenShareEnabled) {
+        setViewMode('speaker');
+      }
+    } catch {
+      // User cancelled screen share picker
     }
   }, [localParticipant, screenShareEnabled]);
 
@@ -69,17 +125,14 @@ function RoomInner({ roomCode, onLeave }) {
     onLeave();
   }, [room, onLeave]);
 
-  const cameraTracks = tracks.filter(
-    (t) =>
-      t.source === Track.Source.Camera || t.source === Track.Source.ScreenShare
-  );
-
-  const participants = room
-    ? [room.localParticipant, ...Array.from(room.remoteParticipants.values())]
-    : [];
-
   return (
     <div className={styles.conference}>
+      {isReconnecting && (
+        <div className={styles.reconnectBar}>
+          Reconnecting...
+        </div>
+      )}
+
       <header className={styles.header}>
         <span className={styles.brand}>VibeMeet</span>
         <CodeDisplay code={roomCode} />
@@ -88,15 +141,16 @@ function RoomInner({ roomCode, onLeave }) {
         </button>
       </header>
 
+      <AudioRenderer tracks={audioTracks} localIdentity={localParticipant?.identity} />
+
       <VideoGrid participantCount={participants.length} viewMode={viewMode}>
-        {cameraTracks.map((trackRef) => {
+        {videoTracks.map((trackRef) => {
           const participant = trackRef.participant;
-          const isLocal =
-            participant?.identity === room?.localParticipant?.identity;
+          const isLocal = participant?.identity === localParticipant?.identity;
           return (
             <VideoTile
-              key={trackRef.participant?.identity + '-' + trackRef.source}
-              track={trackRef.publication?.track}
+              key={participant?.identity + '-' + trackRef.source}
+              trackRef={trackRef}
               participant={participant}
               quality={qualities[participant?.identity]}
               isLocal={isLocal}
@@ -158,7 +212,7 @@ function Room() {
     return (
       <div className={styles.loadingScreen}>
         <p className={styles.errorText}>Failed to join: {error}</p>
-        <button className={styles.retryBtn} onClick={() => { setJoined(false); }}>
+        <button className={styles.retryBtn} onClick={() => setJoined(false)}>
           Try again
         </button>
         <button className={styles.retryBtn} onClick={() => navigate('/')}>
@@ -182,13 +236,9 @@ function Room() {
       token={token}
       serverUrl={wsUrl}
       connect={true}
-      options={{
-        adaptiveStream: true,
-        dynacast: true,
-        publishDefaults: {
-          simulcast: true,
-        },
-      }}
+      audio={true}
+      video={true}
+      options={ROOM_OPTIONS}
     >
       <RoomInner roomCode={code} onLeave={handleLeave} />
     </LiveKitRoom>

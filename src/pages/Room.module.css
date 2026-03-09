@@ -1,83 +1,95 @@
-.loadingScreen {
+﻿.conference {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  gap: var(--space-4);
+  height: 100dvh;
   background: var(--bg-base);
-}
-
-.loadingText {
-  color: var(--fg-secondary);
-  font-size: var(--text-base);
-}
-
-.errorText {
-  color: var(--red);
-  font-size: var(--text-base);
-}
-
-.retryBtn {
-  padding: var(--space-2) var(--space-6);
-  background: var(--bg-elevated);
-  border: 1px solid var(--tile-border);
-  border-radius: var(--radius-md);
-  color: var(--fg-primary);
-  font-family: var(--font-family);
-  font-size: var(--text-base);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.retryBtn:hover {
-  background: var(--bg-surface);
-}
-
-.conference {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: var(--bg-base);
+  overflow: hidden;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-3) var(--space-6);
+  padding: var(--sp-3) var(--sp-4);
   background: var(--bg-surface);
   border-bottom: 1px solid var(--tile-border);
+  flex-shrink: 0;
+  z-index: 10;
 }
 
 .brand {
   font-size: var(--text-lg);
   font-weight: 700;
   color: var(--fg-primary);
+  letter-spacing: -0.02em;
 }
 
 .leaveHeader {
-  padding: var(--space-1) var(--space-4);
-  background: transparent;
-  border: 1px solid var(--red);
-  border-radius: var(--radius-sm);
-  color: var(--red);
-  font-family: var(--font-family);
   font-size: var(--text-sm);
   font-weight: 500;
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  color: var(--fg-secondary);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
 .leaveHeader:hover {
-  background: var(--red);
-  color: #fff;
+  background: var(--red-muted);
+  color: var(--red);
+}
+
+.reconnectBar {
+  background: var(--amber);
+  color: #000;
+  text-align: center;
+  padding: var(--sp-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.loadingScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  gap: var(--sp-4);
+  background: var(--bg-base);
+}
+
+.loadingText {
+  color: var(--fg-secondary);
+  font-size: var(--text-sm);
+}
+
+.errorText {
+  color: var(--red);
+  font-size: var(--text-base);
+  text-align: center;
+  max-width: 400px;
+}
+
+.retryBtn {
+  padding: var(--sp-2) var(--sp-6);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--fg-primary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.retryBtn:hover {
+  background: var(--bg-hover);
 }
 
 @media (max-width: 640px) {
   .header {
-    padding: var(--space-2) var(--space-3);
+    padding: var(--sp-2) var(--sp-3);
   }
+
   .brand {
     font-size: var(--text-base);
   }

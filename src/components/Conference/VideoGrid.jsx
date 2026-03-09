@@ -1,42 +1,52 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import styles from './VideoGrid.module.css';
 
-function getGridColumns(count, width) {
-  if (width < 480) return 1;
-  if (count === 1) return 1;
-  if (count === 2) return 2;
-  if (count <= 4) return width < 768 ? 1 : 2;
-  return width < 768 ? 2 : 3;
-}
+function VideoGrid({ participantCount, viewMode, children }) {
+  const childArray = React.Children.toArray(children);
 
-function VideoGrid({ children, participantCount, viewMode = 'grid' }) {
-  const [width, setWidth] = React.useState(window.innerWidth);
-
-  React.useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const columns = useMemo(
-    () => getGridColumns(participantCount, width),
-    [participantCount, width]
-  );
-
-  if (viewMode === 'speaker') {
-    return <div className={styles.speakerLayout}>{children}</div>;
+  if (viewMode === 'speaker' && childArray.length > 1) {
+    return (
+      <div className={styles.speakerLayout}>
+        <div className={styles.mainStage}>{childArray[0]}</div>
+        <div className={styles.strip}>
+          {childArray.slice(1).map((child) => (
+            <div key={child.key} className={styles.stripTile}>
+              {child}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
-  if (viewMode === 'sidebar') {
-    return <div className={styles.sidebarLayout}>{children}</div>;
+  if (viewMode === 'sidebar' && childArray.length > 1) {
+    return (
+      <div className={styles.sidebarLayout}>
+        <div className={styles.mainStage}>{childArray[0]}</div>
+        <div className={styles.sidebar}>
+          {childArray.slice(1).map((child) => (
+            <div key={child.key} className={styles.sidebarTile}>
+              {child}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
+
+  const cols =
+    participantCount <= 1 ? 1 : participantCount <= 4 ? 2 : participantCount <= 9 ? 3 : 4;
 
   return (
     <div
       className={styles.grid}
-      style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+      style={{ '--cols': cols }}
     >
-      {children}
+      {childArray.map((child) => (
+        <div key={child.key} className={styles.cell}>
+          {child}
+        </div>
+      ))}
     </div>
   );
 }

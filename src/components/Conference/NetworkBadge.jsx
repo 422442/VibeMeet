@@ -6,11 +6,11 @@ const QUALITY_MAP = {
   [ConnectionQuality.Excellent]: { className: 'excellent', label: 'Excellent' },
   [ConnectionQuality.Good]: { className: 'good', label: 'Good' },
   [ConnectionQuality.Poor]: { className: 'poor', label: 'Poor' },
-  [ConnectionQuality.Lost]: { className: 'poor', label: 'Lost' },
+  [ConnectionQuality.Lost]: { className: 'lost', label: 'Lost' },
 };
 
 function NetworkBadge({ quality }) {
-  const info = QUALITY_MAP[quality] || { className: 'unknown', label: 'Connecting' };
+  const info = QUALITY_MAP[quality] || { className: 'good', label: 'Connecting' };
 
   return (
     <span
@@ -18,8 +18,10 @@ function NetworkBadge({ quality }) {
       aria-label={`Connection: ${info.label}`}
       title={`Connection: ${info.label}`}
     >
-      <span className={styles.dot} />
-      <span className={styles.srOnly}>Connection: {info.label}</span>
+      <span className={styles.bar} />
+      <span className={styles.bar} />
+      <span className={styles.bar} />
+      <span className={styles.bar} />
     </span>
   );
 }
